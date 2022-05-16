@@ -1,134 +1,173 @@
 #include <iostream>
 
 class Vector {
-	double* m_data{ nullptr };
-	int m_n{ 0 };
+	int m_n{ 0 };														//длина массива
+	double* m_data{ nullptr }; 
 public:
-	Vector() {};
-	Vector(int n) {
-		m_n = n;
+	Vector(int n) :														//конструктор с параметром длины массива m_data
+		m_n(n)
+	{
 		m_data = new double[m_n];
-		for (int count = 0; count < m_n; count++)
-			m_data[count] = 0.;
+		for (int count = 0; count < m_n; count++) {
+			m_data[count] = 0.0;
+		}
 	}
 	~Vector() {
 		delete[] m_data;
 		m_data = nullptr;
 		m_n = 0;
 	}
-	void resize(int newSize) {
-		double* newArr = new double[newSize];
-		int minLenght = std::min(m_n, newSize);
-		for (int count = 0; count < minLenght; count++) {
-			newArr[count] = m_data[count];
-		}
 
+	double& operator[](int count) {
+		return (m_data[count]);
+	}
+
+	double operator[](int count) const {
+		return (m_data[count]);
+	}
+
+	void resize(int newSize) {
+		double* newM_Data = new double[newSize];
+		int minLenght = std::min(newSize, m_n);
+		for (int count = 0; count < minLenght; count++) {
+			newM_Data[count] = m_data[count];
+		}
+		
 		delete[] m_data;
-		m_data = newArr;
+		m_data = newM_Data;
 
 		for (int count = 0; count < newSize; count++) {
-			m_data[count] = 0.;
+			newM_Data[count] = 0.0;
 		}
 
 		m_n = newSize;
 	}
-	Vector& operator=(const Vector& v) {
-		resize(v.m_n);
-		for (int count = 0; count < m_n; count++)
-			m_data[count] = v.m_data[count];
-		return *this;
-	}
-	Vector operator+(const Vector& v) {
-		if (m_n != v.m_n) {
-			std::cout << "ERROR" << std::endl;
-			exit(0);
-		}
-		Vector other(v.m_n);
-		for (int count = 0; count < m_n; count++) {
-			other.m_data[count] = m_data[count] + v.m_data[count];
-		}
-		return other;
-	}
-	Vector operator-(const Vector& v) {
-		if (m_n != v.m_n) {
-			std::cout << "ERROR" << std::endl;
-			exit(0);
-		}
-		Vector other(v.m_n);
-		for (int count = 0; count < m_n; count++) {
-			other.m_data[count] = m_data[count] - v.m_data[count];
-		}
-		return other;
-	}
-	Vector& operator+=(const Vector& v) {
-		if (m_n != v.m_n) {
-			std::cout << "ERROR" << std::endl;
-			exit(0);
-		}
-		for (int count = 0; count < m_n; count++) {
-			m_data[count] += v.m_data[count];
+
+	Vector& operator=(const Vector& other) {
+		resize(other.m_n);
+		for (int count = 0; count < other.m_n; count++) {
+			m_data[count] = other.m_data[count];
 		}
 		return *this;
 	}
-	Vector& operator-=(const Vector& v) {
-		if (m_n != v.m_n) {
-			std::cout << "ERROR" << std::endl;
-			exit(0);
+
+	Vector operator + (const Vector& other) const{
+		if (other.m_n != m_n) {
+			throw "ERROR";
+		}
+		Vector newVector(m_n);
+		for (int count = 0; count < m_n; count++) {
+			newVector[count] = m_data[count] + other[count];
+		}
+		return newVector;
+	}
+
+	Vector operator-(const Vector& other) const{
+		if (other.m_n != m_n) {
+			throw "ERROR";
+		}
+		Vector newVector(m_n);
+		for (int count = 0; count < m_n; count++) {
+			newVector[count] = m_data[count] - other[count];
+		}
+		return newVector;
+	}
+
+	Vector& operator+=(const Vector& other) {
+		if (other.m_n != m_n) {
+			throw "ERROR";
 		}
 		for (int count = 0; count < m_n; count++) {
-			m_data[count] -= v.m_data[count];
+			m_data[count] += other.m_data[count];
 		}
 		return *this;
 	}
-	Vector operator*(double x) {
+
+	Vector& operator-=(const Vector& other) {
+		if (other.m_n != m_n) {
+			throw "ERROR";
+		}
+		for (int count = 0; count < m_n; count++) {
+			m_data[count] -= other.m_data[count];
+		}
+		return *this;
+	}
+
+	Vector& operator*=(double value) {
+		for (int count = 0; count < m_n; count++) {
+			m_data[count] *= value;
+		}
+		return *this;
+	}
+
+	Vector operator*(double value) const{
 		Vector other(m_n);
-		for (int count = 0; count < m_n; count++)
-			other.m_data[count] = m_data[count] * x;
+		for (int count = 0; count < other.m_n; count++) {
+			other.m_data[count] = m_data[count] + value;
+		}
 		return other;
 	}
-	Vector& operator*=(double x) {
-		for (int count = 0; count < m_n; count++)
-			m_data[count] *= x;
-		return *this;
-	}
-	double dot(const Vector& v)
-	{
-		double other = .0;
+
+	double dot(const Vector& other) {
+		double lenght = 0;
 		for (int count = 0; count < m_n; count++)
 		{
-			other += v.m_data[count] * m_data[count];
+			lenght += other.m_data[count] * m_data[count];
 		}
-		return other;
+		return lenght;
 	}
-	void print() {
+
+	void prin() {
+		std::cout << "{";
 		for (int count = 0; count < m_n; count++) {
-			std::cout << m_data[count] << " ";
+			std::cout << m_data[count] << ", ";
 		}
+		std::cout << "}" << std::endl;
 	}
 	void setValueVector() {
 		for (int count = 0; count < m_n; count++) {
-			int x;
+			int value;
 			std::cout << "Введите " << count << " элемент: " << std::endl;
-			std::cin >> x;
-			m_data[count] = x;
+			std::cin >> value;
+			m_data[count] = value;
 		}
+	}
+
+	friend std::ostream& operator<<(std::ostream& out, const Vector& other) {
+		out << "{";
+		for (int count = 0; count < other.m_n; count++) {
+			out << other.m_data[count] << ", ";
+		}
+		out << "}";
+		return out;
 	}
 };
 
-int main()
-{
+int main() {
+	Vector first(5);
+	first[0] = 1;
+	first[1] = 2;
+	first[2] = 3;
+	first[3] = 4;
+	first[4] = 5;
+	std::cout << first << std::endl;
+	std::cout << first * 5 << std::endl;
 
-	setlocale(LC_ALL, "Russian");
-	Vector a(5);
-	a.setValueVector();
-	a.print();
-	a *= 5;
-	std::cout << std::endl;
-	a.print();
-	std::cout << std::endl;
-	a.resize(10);
-	a.setValueVector();
-	a.print();
+	Vector second(5);
+	first[0] = 5;
+	first[1] = 4;
+	first[2] = 3;
+	first[3] = 2;
+	first[4] = 1;
+	std::cout << second << std::endl;
+
+	std::cout << "first + second = " << first + second << std::endl;
+	std::cout << "first - second = " << first - second << std::endl;
+
+	Vector third(3);
+	std::cout << third << std::endl;
+
+	std::cout << "first * 3" << first * 3 << std::endl;
 
 	return 0;
 }
